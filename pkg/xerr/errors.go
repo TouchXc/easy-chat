@@ -1,0 +1,13 @@
+package xerr
+
+import "github.com/zeromicro/x/errors"
+
+func New(code int, msg string) error {
+	return errors.New(code, msg)
+}
+func NewDBErr() error {
+	return errors.New(DB_ERROR, ErrMsg(DB_ERROR))
+}
+func NewInternalErr() error {
+	return errors.New(SERVER_COMMON_ERROE, ErrMsg(SERVER_COMMON_ERROE))
+}

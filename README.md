@@ -1,0 +1,1 @@
+基于go-zero框架实现im聊天项目，技术栈：go+gorm+redis+go-zero+kafka+minio+etcd

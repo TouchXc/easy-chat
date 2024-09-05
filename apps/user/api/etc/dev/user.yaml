@@ -1,0 +1,11 @@
+Name: user
+Host: 0.0.0.0
+Port: 8888
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+JwtAuth:
+  AccessSecret: xjsnbxjsnb
+  AccessExpire: 8640000 #过期时间：单位为s, 60*60*24*100
