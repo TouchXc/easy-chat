@@ -6,6 +6,13 @@ UserRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: user.rpc
+
+Redisx:
+  Host: 127.0.0.1:6379
+  Type: node
+  Pass:
+
+
 JwtAuth:
   AccessSecret: xjsnbxjsnb
   AccessExpire: 8640000 #过期时间：单位为s, 60*60*24*100

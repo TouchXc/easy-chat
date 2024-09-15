@@ -19,54 +19,54 @@ services:
     networks:
       easy-chat:
 
-  redis:
-    image: redis:alpine3.18
-    ports:
-      - 16379:6379
-    container_name: redis
-    volumes:
-      - ./components/redis/data:/data
-      - D:/GoProject/easy-chat/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
-    environment:
-      TZ: Asia/Shanghai
-    restart: always
-    networks:
-      easy-chat:
-    command: redis-server --requirepass easy-chat --appendonly yes
+#  redis:
+#    image: redis:alpine3.18
+#    ports:
+#      - 16379:6379
+#    container_name: redis
+#    volumes:
+#      - ./components/redis/data:/data
+#      - D:/GoProject/easy-chat/components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+#    environment:
+#      TZ: Asia/Shanghai
+#    restart: always
+#    networks:
+#      easy-chat:
+#    command: redis-server --requirepass easy-chat --appendonly yes
+#
+#  mysql:
+#    image: mysql:8.0
+#    ports:
+#      - 13306:3306
+#    container_name: mysql
+#    volumes:
+#      - ./components/mysql/data:/var/lib/mysql
+#      - /dev/localtime:/dev/localtime
+#    environment:
+#      TZ: Asia/Shanghai
+##      MYSQL_ROOT_PASSWORD: easy-chat
+#      MYSQL_ROOT_PASSWORD: root
+#    restart: always
+#    networks:
+#      easy-chat:
 
-  mysql:
-    image: mysql:8.0
-    ports:
-      - 13306:3306
-    container_name: mysql
-    volumes:
-      - ./components/mysql/data:/var/lib/mysql
-      - /dev/localtime:/dev/localtime
-    environment:
-      TZ: Asia/Shanghai
-#      MYSQL_ROOT_PASSWORD: easy-chat
-      MYSQL_ROOT_PASSWORD: root
-    restart: always
-    networks:
-      easy-chat:
-
-  mongo:
-    image: mongo:7.0
-    container_name: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: easy-chat
-      MONGO_INITDB_ROOT_PASSWORD:
-      TZ: Asia/Shanghai
-    ports:
-      - 47017:27017
-    volumes:
-      - ./components/mongo/data:/data/db
-      - /dev/localtime:/dev/localtime
-    restart: always
-    networks:
-      easy-chat:
+#  mongo:
+#    image: mongo:7.0
+#    container_name: mongo
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME:
+##      MONGO_INITDB_ROOT_USERNAME: root
+##      MONGO_INITDB_ROOT_PASSWORD: easy-chat
+#      MONGO_INITDB_ROOT_PASSWORD:
+#      TZ: Asia/Shanghai
+#    ports:
+#      - 47017:27017
+#    volumes:
+#      - ./components/mongo/data:/data/db
+#      - /dev/localtime:/dev/localtime
+#    restart: always
+#    networks:
+#      easy-chat:
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -92,7 +92,8 @@ services:
       KAFKA_BROKER_ID: 0
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "ws2ms_chat:8:1,ms2ps_chat:8:1,msg_to_mongo:8:1"
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://192.168.199.138:9092
+#      KAFKA_ADVERTISED_LISTENERS: INSIDE://192.168.199.138:9092
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://192.168.116.1:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_LISTENERS: INSIDE://:9092
@@ -134,32 +135,32 @@ services:
     networks:
       easy-chat:
 
-  sail:
-    image: ccr.ccs.tencentyun.com/hyy-yu/sail:latest
-    container_name: sail
-    ports:
-      - "8108:8108"
-    volumes:
-      - "./components/sail/compose-cfg.toml:/app/cfg.toml"
-    restart: always
-    platform: linux/arm64
-    networks:
-      easy-chat:
-
-  jeager:
-    image: jaegertracing/all-in-one:latest
-    container_name: jeager
-    ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-      - "9411:9411"
-    restart: always
-    networks:
-      easy-chat:
+#  sail:
+#    image: ccr.ccs.tencentyun.com/hyy-yu/sail:latest
+#    container_name: sail
+#    ports:
+#      - "8108:8108"
+#    volumes:
+#      - "./components/sail/compose-cfg.toml:/app/cfg.toml"
+#    restart: always
+#    platform: linux/arm64
+#    networks:
+#      easy-chat:
+#
+#  jeager:
+#    image: jaegertracing/all-in-one:latest
+#    container_name: jeager
+#    ports:
+#      - "5775:5775/udp"
+#      - "6831:6831/udp"
+#      - "6832:6832/udp"
+#      - "5778:5778"
+#      - "16686:16686"
+#      - "14268:14268"
+#      - "9411:9411"
+#    restart: always
+#    networks:
+#      easy-chat:
 
 networks:
   easy-chat:

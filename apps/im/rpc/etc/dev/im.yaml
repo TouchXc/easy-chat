@@ -1,0 +1,15 @@
+Name: im.rpc
+ListenOn: 0.0.0.0:8080
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: im.rpc
+
+Mongo:
+  Url: "mongodb://127.0.0.1:27017"
+  Db: easy-chat
+
+#Telemetry:
+#  Name: im.rpc
+#  Endpoint: http://192.168.199.138:14268/api/traces
+#  Batcher: jaeger

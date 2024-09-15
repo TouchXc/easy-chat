@@ -18,21 +18,20 @@ import (
 var (
 	friendsFieldNames          = builder.RawFieldNames(&Friends{})
 	friendsRows                = strings.Join(friendsFieldNames, ",")
-	friendsRowsExpectAutoSet   = strings.Join(stringx.Remove(friendsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	friendsRowsWithPlaceHolder = strings.Join(stringx.Remove(friendsFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
-
-	cacheFriendsIdPrefix = "cache:friends:id:"
+	friendsRowsExpectAutoSet   = strings.Join(stringx.Remove(friendsFieldNames, "`id`", "`create_time`", "`update_time`", "`create_at`", "`update_at`"), ",")
+	friendsRowsWithPlaceHolder = strings.Join(stringx.Remove(friendsFieldNames, "`id`", "`create_time`", "`update_time`", "`create_at`", "`update_at`"), "=?,") + "=?"
+	cacheFriendsIdPrefix       = "cache:friends:id:"
 )
 
 type (
 	friendsModel interface {
 		Insert(ctx context.Context, data *Friends) (sql.Result, error)
-		Inserts(ctx context.Context,session sqlx.Session,data ...*Friends)(sql.Result,error)
+		Inserts(ctx context.Context, session sqlx.Session, data ...*Friends) (sql.Result, error)
 		FindOne(ctx context.Context, id int64) (*Friends, error)
-		FindByUidAndFid(ctx context.Context,uid ,fid string)(*Friends,error)
-		ListByUserid(ctx context.Context,userId string)([]*Friends,error)
+		FindByUidAndFid(ctx context.Context, uid, fid string) (*Friends, error)
 		Update(ctx context.Context, data *Friends) error
 		Delete(ctx context.Context, id int64) error
+		ListByUserId(ctx context.Context, uid string) ([]*Friends, error)
 	}
 
 	defaultFriendsModel struct {
@@ -53,13 +52,6 @@ type (
 func newFriendsModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *defaultFriendsModel {
 	return &defaultFriendsModel{
 		CachedConn: sqlc.NewConn(conn, c, opts...),
-		table:      "`friends`",
-	}
-}
-
-func (m *defaultFriendsModel) withSession(session sqlx.Session) *defaultFriendsModel {
-	return &defaultFriendsModel{
-		CachedConn: m.CachedConn.WithSession(session),
 		table:      "`friends`",
 	}
 }
@@ -90,9 +82,8 @@ func (m *defaultFriendsModel) FindOne(ctx context.Context, id int64) (*Friends, 
 	}
 }
 
-func (m *defaultFriendsModel)FindByUidAndFid(ctx context.Context,uid ,fid string)(*Friends,error){
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and  `friend_uid` = ?",
-		friendsRows, m.table)
+func (m *defaultFriendsModel) FindByUidAndFid(ctx context.Context, uid, fid string) (*Friends, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `friend_uid` = ?", friendsRows, m.table)
 	var resp Friends
 	err := m.QueryRowNoCacheCtx(ctx, &resp, query, uid, fid)
 	switch err {
@@ -114,39 +105,31 @@ func (m *defaultFriendsModel) Insert(ctx context.Context, data *Friends) (sql.Re
 	return ret, err
 }
 
-
-func(m *defaultFriendsModel)ListByUserid(ctx context.Context,userId string)([]*Friends,error){
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? ", friendsRows, m.table)
-	var resp []*Friends
-	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId)
-	switch err {
-	case nil:
-		return resp, nil
-	default:
-		return nil, err
-	}
-}
-func(m *defaultFriendsModel)Inserts(ctx context.Context,session sqlx.Session,data ...*Friends)(sql.Result,error){
-	var(
-		sql strings.Builder
+func (m *defaultFriendsModel) Inserts(ctx context.Context, session sqlx.Session, data ...*Friends) (sql.Result, error) {
+	var (
+		sql  strings.Builder
 		args []any
 	)
-	if len(data)==0{
-		return nil,nil
+
+	if len(data) == 0 {
+		return nil, nil
 	}
+
 	// insert into tablename values(数据), (数据)
 	s := fmt.Sprintf("insert into %s (%s) values ", m.table, friendsRowsExpectAutoSet)
 	fmt.Println(s)
 	sql.WriteString(s)
+
 	for i, v := range data {
-		sql.WriteString("(?, ?, ?, ?)")
-		args = append(args,v.UserId, v.FriendUid, v.Remark, v.AddSource)
-		fmt.Println(args)
+		sql.WriteString("(?, ?, ?, ?, ?)")
+		args = append(args, v.UserId, v.FriendUid, v.Remark, v.AddSource, v.CreatedAt)
 		if i == len(data)-1 {
 			break
 		}
+
 		sql.WriteString(",")
 	}
+
 	return session.ExecCtx(ctx, sql.String(), args...)
 }
 
@@ -157,6 +140,18 @@ func (m *defaultFriendsModel) Update(ctx context.Context, data *Friends) error {
 		return conn.ExecCtx(ctx, query, data.UserId, data.FriendUid, data.Remark, data.AddSource, data.Id)
 	}, friendsIdKey)
 	return err
+}
+
+func (m *defaultFriendsModel) ListByUserId(ctx context.Context, userId string) ([]*Friends, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? ", friendsRows, m.table)
+	var resp []*Friends
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
 }
 
 func (m *defaultFriendsModel) formatPrimary(primary any) string {

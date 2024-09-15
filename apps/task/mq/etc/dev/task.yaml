@@ -1,0 +1,45 @@
+Name: task.mq
+ListenOn: 0.0.0.0:10091
+
+#消息处理kafka消费者
+MsgChatTransfer:
+  Name: MsgChatTransfer
+  Brokers:
+    - 127.0.0.1:9092
+  Group: kafka
+  Topic: msgChatTransfer
+  Offset: first
+  Consumers: 1
+#已读未读处理的kafka消费者
+MsgReadTransfer:
+  Name: MsgReadTransfer
+  Brokers:
+    - 127.0.0.1:9092
+  Group: kafka
+  Topic: msgReadTransfer
+  Offset: first
+  Consumers: 1
+MsgReadHandler:
+  GroupMsgReadHandler: 1
+  GroupMsgReadRecordDelayTime: 60
+  GroupMsgReadRecordDelayCount: 2
+Mongo:
+  Url: "mongodb://127.0.0.1:27017"
+  Db: easy-chat
+SocialRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: social.rpc
+
+Redisx:
+  Host: 127.0.0.1:6379
+  Type: node
+  Pass:
+
+Ws:
+  Host: 127.0.0.1:10090
+
+JwtAuth:
+  AccessSecret: xjsnbxjsnb
+  AccessExpire: 8640000 #过期时间：单位为s, 60*60*24*100

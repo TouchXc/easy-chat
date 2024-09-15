@@ -33,11 +33,10 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	//增加统一错误处理
 	s.AddUnaryInterceptors(rpcserver.LogInterceptor)
 
 	defer s.Stop()
-
-	//增加统一错误处理
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

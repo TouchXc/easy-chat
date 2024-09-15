@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"easy-chat/apps/user/rpc/user"
+	"easy-chat/pkg/constants"
 	"github.com/jinzhu/copier"
 
 	"easy-chat/apps/user/api/internal/svc"
@@ -26,7 +27,6 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 }
 
 func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginResp, err error) {
-	// todo: add your logic here and delete this line
 	LoginResp, err := l.svcCtx.User.Login(l.ctx, &user.LoginReq{
 		Phone:    req.Phone,
 		Password: req.Password,
@@ -36,5 +36,8 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginResp, err erro
 	}
 	var res types.LoginResp
 	copier.Copy(&res, LoginResp)
+
+	//处理登录的业务
+	l.svcCtx.Redis.HsetCtx(l.ctx, constants.RedisOnlineUser, LoginResp.Id, "1")
 	return &res, nil
 }

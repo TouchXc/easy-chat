@@ -55,6 +55,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
 		return nil, errors.Wrapf(xerr.NewDBErr(), "ctx get jwt token err %v,req %v", err, in.Phone)
 	}
 	return &user.LoginResp{
+		Id:     userEntity.Id,
 		Token:  token,
 		Expire: nowTime + l.svcCtx.Config.Jwt.AccessExpire,
 	}, nil
