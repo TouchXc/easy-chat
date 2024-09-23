@@ -4,6 +4,7 @@ import "easy-chat/pkg/constants"
 
 // MsgChatTransfer kafka消息格式
 type MsgChatTransfer struct {
+	MsgId              string            `mapstructure:"msgId"`
 	ConversationId     string            `json:"conversationId"` // 聊天会话的唯一标识符
 	constants.ChatType `json:"chatType"` // 聊天的类型，定义在 constants 中
 	SendId             string            `json:"sendId"` // 发送者的唯一标识符

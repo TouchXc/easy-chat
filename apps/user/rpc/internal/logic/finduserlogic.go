@@ -24,7 +24,6 @@ func NewFindUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FindUser
 }
 
 func (l *FindUserLogic) FindUser(in *user.FindUserReq) (*user.FindUserResp, error) {
-	// todo: add your logic here and delete this line
 	//根据手机号或用户名或ids查找
 	var (
 		userEntitys []*models.Users

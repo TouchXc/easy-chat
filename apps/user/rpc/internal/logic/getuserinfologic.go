@@ -31,7 +31,6 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 }
 
 func (l *GetUserInfoLogic) GetUserInfo(in *user.GetUserInfoReq) (*user.GetUserInfoResp, error) {
-	// todo: add your logic here and delete this line
 	userEntity, err := l.svcCtx.UsersModel.FindOne(l.ctx, in.Id)
 	if err != nil {
 		if err == models.ErrNotFound {

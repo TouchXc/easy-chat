@@ -30,6 +30,31 @@ func (t AckType) ToString() string {
 	return "NoAck"
 }
 
+// Server 表示 WebSocket 服务器的实现。
+//
+// 字段:
+//   - routes: map[string]HandlerFunc
+//     存储与请求方法对应的处理函数的路由表，每个请求方法都映射到一个特定的 `HandlerFunc`。
+//   - addr: string
+//     服务器监听的地址，表示 WebSocket 服务器将在哪个地址和端口上监听连接。
+//   - patten: string
+//     WebSocket 连接的路径模式，用于匹配客户端连接的路径。
+//   - opt: *websocketOption
+//     WebSocket 连接的配置选项，定义了各种 WebSocket 相关的配置参数。
+//   - upgrader: websocket.Upgrader
+//     WebSocket 协议升级器，用于将 HTTP 连接升级为 WebSocket 连接。
+//   - Logger: logx.Logger
+//     日志记录器，用于记录服务器的日志信息，包括错误、信息和调试日志。
+//   - connToUser: map[*Conn]string
+//     连接到用户映射表，将每个 WebSocket 连接映射到其对应的用户 ID。
+//   - userToConn: map[string]*Conn
+//     用户到连接映射表，将每个用户 ID 映射到其当前的 WebSocket 连接。
+//   - TaskRunner: *threading.TaskRunner
+//     任务运行器，用于管理和执行异步任务。
+//   - RWMutex: sync.RWMutex
+//     读写互斥锁，用于保护连接和用户映射表的并发读写操作。
+//   - authentication: Authentication
+//     鉴权接口，负责处理 WebSocket 连接的鉴权逻辑。
 type Server struct {
 	sync.RWMutex
 	*threading.TaskRunner
@@ -38,10 +63,12 @@ type Server struct {
 
 	authentication Authentication
 
-	addr       string
-	patten     string
-	connToUser map[*Conn]string
-	userToConn map[string]*Conn
+	addr   string
+	patten string
+	//websocket连接对象存储
+	connToUser map[*Conn]string //从连接找到用户
+
+	userToConn map[string]*Conn //从用户找到连接对象
 	upgradee   websocket.Upgrader
 	logx.Logger
 }
@@ -121,8 +148,9 @@ func (s *Server) handlerConn(conn *Conn) {
 		var message Message
 		if err = json.Unmarshal(msg, &message); err != nil {
 			s.Errorf("websocket unmarshal err %v,msg %v", err, msg)
-			s.Close(conn)
-			return
+			//s.Close(conn)
+			//return
+			continue
 		}
 		//给客户端回复一个ack
 
@@ -260,7 +288,9 @@ func (s *Server) handlerWrite(conn *Conn) {
 		}
 	}
 }
+
 func (s *Server) addConn(conn *Conn, req *http.Request) {
+	//这里解析请求中的userId，原方法中中如果没有就根据时间戳生成id
 	uid := s.authentication.UserId(req)
 	s.RWMutex.Lock()
 	defer s.RWMutex.Unlock()

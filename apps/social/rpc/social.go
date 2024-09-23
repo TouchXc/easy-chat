@@ -1,6 +1,7 @@
 package main
 
 import (
+	interceptor "easy-chat/pkg/intercepter"
 	"easy-chat/pkg/intercepter/rpcserver"
 	"flag"
 	"fmt"
@@ -35,7 +36,8 @@ func main() {
 	})
 	//增加统一错误处理
 	s.AddUnaryInterceptors(rpcserver.LogInterceptor)
-
+	//增加幂等性请求拦截器
+	s.AddUnaryInterceptors(interceptor.NewIdempotenceServer(interceptor.NewDefaultIdempotent(c.Cache[0].RedisConf)))
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
